@@ -1,0 +1,28 @@
+{
+  "name": "kth-search-push-util",
+  "version": "1.0.0",
+  "description": "Utils to simplifie pushing information to KTH:s search solution",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KTH/kth-search-push-util.git"
+  },
+  "keywords": [
+    "kth",
+    "search",
+    "push",
+    "utils"
+  ],
+  "author": "pontusn@kth.se",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/KTH/kth-search-push-util/issues"
+  },
+  "homepage": "https://github.com/KTH/kth-search-push-util#readme",
+  "dependencies": {
+    "@kth/kth-validation": "^1.0.0"
+  }
+}
