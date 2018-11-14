@@ -1,3 +1,5 @@
 'use strict'
 
-module.exports = require('lib/searchPushUtil')
+module.exports = {
+  SearchPush: require('./lib/searchPushUtil')
+}
