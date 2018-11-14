@@ -12,7 +12,11 @@ const log = {
 
 const resetLog = () => Object.keys(log).forEach(key => { log[key] = sinon.fake() })
 
-const standardConfig = {log: log, client: {}, paths: { postBatch: { uri: 'postBatch.uri' } } }
+const standardConfig = {log: log, client: {}, paths: { 
+  postBatch: { uri: 'postBatch.uri' },
+  deletePage: { uri: 'deletePage.uri'},
+  deletePages: { uri: 'deletePages.uri' }
+} }
 
 const { SearchPush } = require('../index')
 
@@ -38,7 +42,7 @@ describe('SearchPushUtil', () => {
     expect(typeof util.paths).to.equal(typeof standardConfig.paths)
   })
 
-  it('should return a client when correct minimal configuration provided', () => {
+  it('should return a client configured batch size', () => {
     const config = {...standardConfig, batchSize: 100}
     const util = new SearchPush(config)
     expect(util).to.not.be.undefined
@@ -197,14 +201,55 @@ describe('SearchPushUtil', () => {
         })
     })
   })
-  // describe('Flush', () => {
-  //   it('should validate parameters', () => {
-  //     const util = new SearchPush(standardConfig)
 
-  //     util.batch >
+  describe('DeleteOne', () => {
+    it('should fail when required field is missing', async () => {
+      const util = new SearchPush(standardConfig)
 
-  //     util.flush()
-  //   })
-  // })
+      let error
+      try {
+        await util.deleteOne()
+      } catch (e) {
+        error = e
+      }
+      expect(error).to.not.be.undefined
+    })
+
+    it('should delete one', (done) => {
+      const fakeDelAsync = sinon.fake()
+
+      const util = new SearchPush({...standardConfig, client: { delAsync: fakeDelAsync }})
+
+      util.deleteOne({ url: 'test'}).then(() => {
+        expect(fakeDelAsync.callCount).to.equal
+        done()
+      })
+    })
+  })
+
+  describe('DeletePages', () => {
+    it('should fail when required field is missing', async () => {
+      const util = new SearchPush(standardConfig)
+
+      let error
+      try {
+        await util.deletePages()
+      } catch (e) {
+        error = e
+      }
+      expect(error).to.not.be.undefined
+    })
+
+    it('should delete pages', (done) => {
+      const fakeDelAsync = sinon.fake()
+
+      const util = new SearchPush({...standardConfig, client: { delAsync: fakeDelAsync }})
+
+      util.deleteOne({ type: 'test', date: 'testDate'}).then(() => {
+        expect(fakeDelAsync.callCount).to.equal
+        done()
+      })
+    })
+  })
 })
 
