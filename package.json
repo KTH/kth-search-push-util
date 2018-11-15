@@ -1,6 +1,6 @@
 {
   "name": "@kth/kth-search-push-util",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Utils to simplifie pushing information to KTH:s search solution",
   "main": "index.js",
   "scripts": {
