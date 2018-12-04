@@ -202,13 +202,13 @@ describe('SearchPushUtil', () => {
     })
   })
 
-  describe('DeleteOne', () => {
+  describe('deletePage', () => {
     it('should fail when required field is missing', async () => {
       const util = new SearchPush(standardConfig)
 
       let error
       try {
-        await util.deleteOne()
+        await util.deletePage()
       } catch (e) {
         error = e
       }
@@ -220,7 +220,7 @@ describe('SearchPushUtil', () => {
 
       const util = new SearchPush({...standardConfig, client: { delAsync: fakeDelAsync }})
 
-      util.deleteOne({ url: 'test'}).then(() => {
+      util.deletePage({ url: 'test'}).then(() => {
         expect(fakeDelAsync.callCount).to.equal
         done()
       })
@@ -245,7 +245,7 @@ describe('SearchPushUtil', () => {
 
       const util = new SearchPush({...standardConfig, client: { delAsync: fakeDelAsync }})
 
-      util.deleteOne({ type: 'test', date: 'testDate'}).then(() => {
+      util.deletePage({ type: 'test', date: 'testDate'}).then(() => {
         expect(fakeDelAsync.callCount).to.equal
         done()
       })
