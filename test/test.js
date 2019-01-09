@@ -15,7 +15,8 @@ const resetLog = () => Object.keys(log).forEach(key => { log[key] = sinon.fake()
 const standardConfig = {log: log, client: {}, paths: { 
   postBatch: { uri: 'postBatch.uri' },
   deletePage: { uri: 'deletePage.uri'},
-  deletePages: { uri: 'deletePages.uri' }
+  deletePages: { uri: 'deletePages.uri' },
+  deleteBatch: { uri: 'deleteBatch.uri' }
 } }
 
 const { SearchPush } = require('../index')
@@ -54,7 +55,7 @@ describe('SearchPushUtil', () => {
 
     util.pushPage({url: 'kth.se'})
       .then(res => {
-        expect(util.batch.length).to.equal(1)
+        expect(util.batchPush.length).to.equal(0)
         done()
       })
   })
@@ -93,7 +94,7 @@ describe('SearchPushUtil', () => {
 
     util.pushPage({url: 'kth.se'})
       .then(res => {
-        expect(util.batch.length).to.equal(0)
+        expect(util.batchPush.length).to.equal(0)
         expect(postAsyncCalled).to.be.true
         expect(log.debug.callCount).to.equal(1)
         done()
@@ -130,7 +131,7 @@ describe('SearchPushUtil', () => {
 
     util.pushPage({url: 'kth.se'})
       .then(res => {
-        expect(util.batch.length).to.equal(0)
+        expect(util.batchPush.length).to.equal(0)
         expect(postAsyncCalled).to.be.true
         expect(log.error.callCount).to.equal(2)
         done()
@@ -172,7 +173,7 @@ describe('SearchPushUtil', () => {
 
     util.pushPage({url: undefined})
       .then(res => {
-        expect(util.batch.length).to.equal(0)
+        expect(util.batchPush.length).to.equal(0)
         expect(postAsyncCalled).to.be.true
         expect(log.debug.callCount).to.equal(1)
         expect(log.warn.callCount).to.equal(1)
@@ -200,6 +201,36 @@ describe('SearchPushUtil', () => {
           done()
         })
     })
+
+    it('should flush both delete and push batches', (done) => {
+      const fakePostAsync = sinon.fake()
+      const fakeDelAsync = sinon.fake()
+
+      const util = new SearchPush({...standardConfig, batchSize: 10, client: { postAsync: fakePostAsync, delAsync: fakeDelAsync }})
+      util.pushPage({})
+      util.deletePage('test')
+
+      util.flush()
+        .then(() => {
+          expect(fakePostAsync.callCount).to.equal(1)
+          expect(fakeDelAsync.callCount).to.equal(1)
+          done()
+        })
+    })
+
+    it('should flush only the batch with content', (done) => {
+      const fakePostAsync = sinon.fake()
+      const fakeDelAsync = sinon.fake()
+
+      const util = new SearchPush({...standardConfig, client: { postAsync: fakePostAsync, delAsync: fakeDelAsync }})
+      util.pushPage({})
+      util.flush()
+        .then(() => {
+          expect(fakePostAsync.callCount).to.equal(1)
+          expect(fakeDelAsync.callCount).to.equal(0)
+          done()
+        })
+    })
   })
 
   describe('deletePage', () => {
@@ -224,6 +255,51 @@ describe('SearchPushUtil', () => {
         expect(fakeDelAsync.callCount).to.equal
         done()
       })
+    })
+
+    it('should delete batch of 10', (done) => {
+      const paths = {
+        deleteBatch: {
+          uri: 'postBatch.uri'
+        }
+      }
+  
+      let delAsyncCalled = false
+  
+      const client = {
+        delAsync: ({uri, body}) => {
+          delAsyncCalled = true
+          expect(uri).to.equal(paths.deleteBatch.uri)
+          return Promise.resolve({
+            statusCode: 200,
+            body: {
+              removed: 1,
+              total: 1
+            }
+          })
+        }
+      }
+  
+      const config = {
+        client,
+        paths,
+        log,
+        batchSize: 10
+      }
+      
+      const util = new SearchPush(config)
+
+      for (let i = 0; i < 9; i++) {
+        util.deletePage({url: 'kth.se'})
+      } 
+
+      util.deletePage({url: 'kth.se'})
+        .then(res => {
+          expect(util.batchDelete.length).to.equal(0)
+          expect(delAsyncCalled).to.be.true
+          expect(log.debug.callCount).to.equal(1)
+          done()
+        })
     })
   })
 
