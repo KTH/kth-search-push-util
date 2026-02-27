@@ -16,7 +16,11 @@
     "push",
     "utils"
   ],
-  "author": "pontusn@kth.se",
+  "author": {
+    "name": "KTH",
+    "email": "infosys@kth.se",
+    "url": "https://github.com/KTH"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/KTH/kth-search-push-util/issues"
