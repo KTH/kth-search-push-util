@@ -4,6 +4,7 @@
   "description": "Utils to simplifie pushing information to KTH:s search solution",
   "main": "index.js",
   "scripts": {
+    "build": "echo 'OK'",
     "test": "jest",
     "prepare": "husky"
   },
